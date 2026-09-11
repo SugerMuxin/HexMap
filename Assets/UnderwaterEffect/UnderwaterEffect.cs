@@ -1,0 +1,329 @@
+using UnityEngine;
+
+/// <summary>
+/// 水面高度查询接口：任何"知道水面在哪"的对象都可实现（海平面、水面 mesh、
+/// 地形系统、格子地图的桥接器等），把"水面判定"从本组件中彻底解耦。
+/// </summary>
+public interface IWaterSurfaceProvider
+{
+    /// <summary>返回 worldPoint 处的水面世界高度 Y。没有水时返回任意远低于地表的数值。</summary>
+    float GetWaterSurfaceY(Vector3 worldPoint);
+}
+
+/// <summary>
+/// 水下视觉效果（A1：全屏后处理）——通用、零游戏逻辑依赖。
+/// 只关心三件事：相机位置、水面在哪里、效果参数。
+///
+/// 水面高度来源（优先级从高到低）：
+///   1. surfaceProvider —— 实现 IWaterSurfaceProvider 的 MonoBehaviour 组件
+///      （水面系统/地形系统/格子地图的桥接器，最灵活，Inspector 直接拖）
+///   2. surfaceObject   —— 一个 Transform，取其世界 Y（水面 mesh / 海平面物体）
+///   3. surfaceY        —— 直接填水面世界高度常数（最简单）
+///
+/// 判定：相机（或可选 probeTransform，如角色）低于水面即触发，没入越深效果越强，
+/// 出水平滑淡出。全部参数可在 Inspector 实时调整。
+///
+/// 独立组件：不引用任何游戏类型，不修改任何现有系统；caustics 噪声纹理在
+/// 运行时自生成（无需外部资源）。配套 shader：Custom/Underwater
+/// （Resources/Shaders/Underwater.shader，跨项目拷贝时需一并携带）。
+/// </summary>
+[RequireComponent(typeof(Camera))]
+public class UnderwaterEffect : MonoBehaviour
+{
+    [Header("水面高度来源")]
+    [Tooltip("水面查询器：实现 IWaterSurfaceProvider 的组件（如 HexWaterBridge）。优先于下面两个")]
+    public MonoBehaviour surfaceProvider;
+    [Tooltip("水面物体（取它的世界 Y 作为水面高度）。优先级高于 surfaceY")]
+    public Transform surfaceObject;
+    [Tooltip("固定水面世界高度 Y（上面两个都没有时使用）")]
+    public float surfaceY = 0f;
+
+    [Header("入水判定")]
+    [Tooltip("额外探测点（如角色）。低于水面也算入水（相机在水上但角色在水里也触发）；留空只按相机")]
+    public Transform probeTransform;
+    [Tooltip("相机低于水面此米数时效果达到 100%（0~该值之间按比例）")]
+    public float enterDepth = 0.6f;
+    [Tooltip("效果淡入淡出时间（秒）")]
+    public float smoothTime = 0.4f;
+    [Tooltip("调试：无视判定，强制满效果")]
+    public bool forceUnderwater = false;
+
+    [Header("材质（可选；留空自动用 Custom/Underwater）")]
+    public Material material;
+
+    [Header("水下效果参数（与 shader 同名属性一一对应）")]
+    [Tooltip("水色（浅/近处）——亮一些，避免水下显得灰")]
+    public Color waterColor = new Color(0.03f, 0.28f, 0.38f, 1f);
+    [Tooltip("深水色（远处）")]
+    public Color deepColor = new Color(0f, 0.05f, 0.12f, 1f);
+    [Range(0.005f, 1f)] public float fogDensity = 0.1f;
+    [Tooltip("雾起始距离：相机此米数内的物体（角色等近景）保持清晰，超出才起雾")]
+    [Range(0f, 20f)] public float fogStart = 3f;
+    [Range(0f, 0.02f)] public float distortion = 0.004f;
+    [Range(0f, 4f)] public float distortSpeed = 1.2f;
+    [Range(0.2f, 1.6f)] public float brightness = 1f;
+    [Range(0f, 1.5f)] public float saturation = 1f;
+    [Range(0f, 1f)] public float vignette = 0.35f;
+    [Range(0f, 1.5f)] public float caustics = 0.45f;
+    [Tooltip("焦散噪声尺度（世界单位频率）：越小光斑越大越柔和，约 1m+ 大光斑")]
+    [Range(0.002f, 0.08f)] public float causticsScale = 0.015f;
+    [Range(0f, 4f)] public float causticsSpeed = 1.6f;
+    [Tooltip("头顶水面透亮强度（透过水面看天空/上方）")]
+    [Range(0f, 2f)] public float surfaceGlow = 1f;
+
+    /// <summary>当前效果强度 0..1（只读；出水自动回落）</summary>
+    public float waterAmount { get; private set; }
+
+    Camera cam;
+    bool loggedMissingShader;
+    bool noiseGenerated;
+
+    void OnEnable()
+    {
+        cam = GetComponent<Camera>();
+        cam.depthTextureMode |= DepthTextureMode.Depth;
+        if (probeTransform == null)
+        {
+            var cc = FindObjectOfType<CharacterController>();
+            if (cc != null)
+            {
+                probeTransform = cc.transform;
+            }
+        }
+        EnsureMaterial();
+    }
+
+    void OnDisable()
+    {
+        waterAmount = 0f;
+        if (material != null && material.hideFlags == HideFlags.HideAndDontSave)
+        {
+            if (Application.isPlaying) Destroy(material);
+            else DestroyImmediate(material);
+            material = null;
+        }
+    }
+
+    void OnPreRender()
+    {
+        if (cam != null)
+        {
+            cam.depthTextureMode |= DepthTextureMode.Depth;
+        }
+    }
+
+    /// <summary>查询某点当前的水面世界高度（供外部/调试用）</summary>
+    public float GetWaterYAt(Vector3 worldPoint)
+    {
+        IWaterSurfaceProvider p = surfaceProvider as IWaterSurfaceProvider;
+        if (p != null)
+        {
+            return p.GetWaterSurfaceY(worldPoint);
+        }
+        if (surfaceObject != null)
+        {
+            return surfaceObject.position.y;
+        }
+        return surfaceY;
+    }
+
+    void Update()
+    {
+        float goal;
+        if (forceUnderwater)
+        {
+            goal = 1f;
+        }
+        else
+        {
+            Vector3 camPos = transform.position;
+            float waterY = GetWaterYAt(camPos);
+
+            float depth = waterY - camPos.y;
+            if (probeTransform != null)
+            {
+                float pd = waterY - probeTransform.position.y;
+                if (pd > depth)
+                {
+                    depth = pd;
+                }
+            }
+            goal = Mathf.Clamp01(depth / Mathf.Max(enterDepth, 0.01f));
+        }
+
+        float rate = smoothTime > 0.001f ? 1f / smoothTime : 100f;
+        waterAmount = Mathf.MoveTowards(waterAmount, goal, rate * Time.deltaTime);
+    }
+
+    void OnRenderImage(RenderTexture source, RenderTexture destination)
+    {
+        if (material == null || waterAmount <= 0.001f)
+        {
+            Graphics.Blit(source, destination);
+            return;
+        }
+        SyncMaterial();
+        Graphics.Blit(source, destination, material, 0);
+    }
+
+    void EnsureMaterial()
+    {
+        if (material != null)
+        {
+            return;
+        }
+        Shader sh = Shader.Find("Custom/Underwater");
+        if (sh == null)
+        {
+            if (!loggedMissingShader)
+            {
+                loggedMissingShader = true;
+                Debug.LogError("[UnderwaterEffect] 找不到 Custom/Underwater shader（请确认 Shader 编译无误）", this);
+            }
+            return;
+        }
+        material = new Material(sh);
+        material.hideFlags = HideFlags.HideAndDontSave;
+        noiseGenerated = false;
+    }
+
+    void SyncMaterial()
+    {
+        Vector3 fwd = cam.transform.forward;
+        var frustum = new Matrix4x4();
+        Vector3[] dirs = new Vector3[]
+        {
+            cam.ViewportPointToRay(new Vector3(0f, 0f, cam.nearClipPlane)).direction,
+            cam.ViewportPointToRay(new Vector3(1f, 0f, cam.nearClipPlane)).direction,
+            cam.ViewportPointToRay(new Vector3(0f, 1f, cam.nearClipPlane)).direction,
+            cam.ViewportPointToRay(new Vector3(1f, 1f, cam.nearClipPlane)).direction
+        };
+        for (int r = 0; r < 4; r++)
+        {
+            float dot = Mathf.Max(Vector3.Dot(dirs[r], fwd), 0.0001f);
+            frustum.SetRow(r, dirs[r] / dot);
+        }
+        material.SetMatrix("_FrustumCornersRay", frustum);
+
+        material.SetColor("_WaterColor", waterColor);
+        material.SetColor("_DeepColor", deepColor);
+        material.SetFloat("_FogDensity", Mathf.Clamp(fogDensity, 0.005f, 1f));
+        material.SetFloat("_FogStart", Mathf.Clamp(fogStart, 0f, 10f));
+        material.SetFloat("_Distortion", Mathf.Clamp(distortion, 0f, 0.02f));
+        material.SetFloat("_DistortSpeed", Mathf.Clamp(distortSpeed, 0f, 4f));
+        material.SetFloat("_Brightness", Mathf.Clamp(brightness, 0.2f, 1.6f));
+        material.SetFloat("_Saturation", Mathf.Clamp(saturation, 0f, 1.5f));
+        material.SetFloat("_Vignette", Mathf.Clamp(vignette, 0f, 1f));
+        material.SetFloat("_Caustics", Mathf.Clamp(caustics, 0f, 1.5f));
+        // 自愈：旧版残留参数会让画面发灰/发花，检测到直接回新默认
+        //  - causticsScale 旧值(26/2) => 毫米级雪花搅灰
+        //  - fogDensity 旧默认 0.28 => 近景角色被雾盖死发灰
+        float cs = causticsScale;
+        if (cs > 0.1f)
+        {
+            cs = 0.015f;
+            causticsScale = cs;
+        }
+        material.SetFloat("_CausticsScale", Mathf.Clamp(cs, 0.002f, 0.08f));
+        if (fogDensity > 0.25f)
+        {
+            fogDensity = 0.1f;
+        }
+        material.SetFloat("_FogDensity", Mathf.Clamp(fogDensity, 0.005f, 1f));
+        material.SetFloat("_CausticsSpeed", Mathf.Clamp(causticsSpeed, 0f, 4f));
+        material.SetFloat("_SurfaceGlow", Mathf.Clamp(surfaceGlow, 0f, 2f));
+        material.SetFloat("_EffectAmount", Mathf.Clamp01(waterAmount));
+
+        // 焦散噪声纹理：运行时自生成（平滑可平铺灰度噪声），无外部依赖
+        if (!noiseGenerated)
+        {
+            Texture2D n = GenerateNoiseTexture(256, 20260904);
+            material.SetTexture("_NoiseTex", n);
+            noiseGenerated = true;
+        }
+    }
+
+    /// <summary>生成平滑、可平铺（Repeat）的灰度噪声纹理，用作 caustics 扰动源</summary>
+    static Texture2D GenerateNoiseTexture(int size, int seed)
+    {
+        var tex = new Texture2D(size, size, TextureFormat.RGB24, false);
+        tex.name = "UnderwaterCausticsNoise";
+        tex.wrapMode = TextureWrapMode.Repeat;
+        tex.filterMode = FilterMode.Bilinear;
+        tex.hideFlags = HideFlags.HideAndDontSave;
+
+        var px = new Color[size * size];
+        float inv = 1f / 255f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // 三档频率的 value noise 叠加：16/8/4 像素波长 -> 纹理内平滑变化
+                float n = ValueNoise(x / 16f, y / 16f, size, seed) * 0.55f
+                        + ValueNoise(x / 8f, y / 8f, size, seed) * 0.30f
+                        + ValueNoise(x / 4f, y / 4f, size, seed) * 0.15f;
+                byte b = (byte)Mathf.RoundToInt(Mathf.Clamp01(n) * 255f);
+                px[y * size + x] = new Color(b * inv, b * inv, b * inv, 1f);
+            }
+        }
+        tex.SetPixels(px);
+        tex.Apply();
+        return tex;
+    }
+
+    static float ValueNoise(float x, float y, int size, int seed)
+    {
+        int ix = Mathf.FloorToInt(x);
+        int iy = Mathf.FloorToInt(y);
+        float fx = x - ix;
+        float fy = y - iy;
+        fx = fx * fx * (3f - 2f * fx);
+        fy = fy * fy * (3f - 2f * fy);
+
+        float h00 = Hash(ix, iy, size, seed);
+        float h10 = Hash(ix + 1, iy, size, seed);
+        float h01 = Hash(ix, iy + 1, size, seed);
+        float h11 = Hash(ix + 1, iy + 1, size, seed);
+
+        float top = Mathf.Lerp(h00, h10, fx);
+        float bot = Mathf.Lerp(h01, h11, fx);
+        return Mathf.Lerp(top, bot, fy);
+    }
+
+    static float Hash(int x, int y, int size, int seed)
+    {
+        // 周期化保证纹理可平铺
+        x = ((x % size) + size) % size;
+        y = ((y % size) + size) % size;
+        float v = Mathf.Sin(x * 127.1f + y * 311.7f + seed * 74.7f) * 43758.5453f;
+        return v - Mathf.Floor(v);
+    }
+
+    /// <summary>恢复全部参数为默认（右键组件菜单可调；旧版残留越界值请先重置）</summary>
+    [ContextMenu("Reset To Defaults")]
+    public void ResetToDefaults()
+    {
+        // 注：不清空水面来源(surfaceProvider/surfaceObject/surfaceY)与探测点，只重置效果参数
+        enterDepth = 0.6f;
+        smoothTime = 0.4f;
+        forceUnderwater = false;
+        material = null;
+        noiseGenerated = false;
+        waterColor = new Color(0.03f, 0.28f, 0.38f, 1f);
+        deepColor = new Color(0f, 0.05f, 0.12f, 1f);
+        fogDensity = 0.1f;
+        fogStart = 3f;
+        distortion = 0.004f;
+        distortSpeed = 1.2f;
+        brightness = 1f;
+        saturation = 1f;
+        vignette = 0.35f;
+        caustics = 0.45f;
+        causticsScale = 0.015f;
+        causticsSpeed = 1.6f;
+        surfaceGlow = 1f;
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+    }
+}
