@@ -1,1 +1,2 @@
-8.水域部分， （7. 河口（Estuaries）部分尚未处理，实在是不想在细化了 ，留待以后吧）
+# HexMap
+This is a personal repository use for study hexmap developed by unity &amp;&amp; c#.
