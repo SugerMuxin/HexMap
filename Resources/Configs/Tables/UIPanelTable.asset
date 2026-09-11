@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08557b2417b3fe6469748d5b5de72aea, type: 3}
+  m_Name: UIPanelTable
+  m_EditorClassIdentifier: 
+  entries:
+  - id: demo
+    prefab: {fileID: 6768404078853239970, guid: 65b60903c9ea0a54390a6280e4a3d6b9, type: 3}
+    prefabPath: UI/Panels/UIDemoPanel
+    layer: 20
+    modal: 1
+    exclusiveGroup: 
+    escClose: 1
+    hotkey: 282
+    blockGameInput: 1
+    preload: 0
+    order: 0
+  - id: demo.second
+    prefab: {fileID: 6768404078853239970, guid: 65b60903c9ea0a54390a6280e4a3d6b9, type: 3}
+    prefabPath: UI/Panels/UIDemoPanel
+    layer: 20
+    modal: 1
+    exclusiveGroup: 
+    escClose: 1
+    hotkey: 0
+    blockGameInput: 1
+    preload: 0
+    order: 1
+  - id: bag
+    prefab: {fileID: 7726826176361383159, guid: f28b43bac4e039a48a9f9c8d37e1ab0a, type: 3}
+    prefabPath: UI/Panels/InventoryPanel
+    layer: 10
+    modal: 1
+    exclusiveGroup: 
+    escClose: 1
+    hotkey: 98
+    blockGameInput: 1
+    preload: 0
+    order: 0
+  - id: lobby
+    prefab: {fileID: 3003471050197433242, guid: cc4f8354d9eacc24ebdaa151182cf39b, type: 3}
+    prefabPath: UI/Panels/LobbyPanel
+    layer: 10
+    modal: 1
+    exclusiveGroup: 
+    escClose: 1
+    hotkey: 283
+    blockGameInput: 1
+    preload: 0
+    order: 1

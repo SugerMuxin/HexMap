@@ -1,0 +1,2 @@
+﻿id,scene,monster,count,interval,maxAlive,startDelay,waves,waveInterval,waitForClear,spawnPoint,offsetX,offsetZ,enabled,order
+SampleScene_Zombie,SampleScene,Zombie,8,3,4,2,1,15,1,LairRoundRobin,0,0,1,0

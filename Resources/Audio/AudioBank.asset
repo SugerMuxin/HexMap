@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc2e3ce1f1f986648bacbe6fe05ff40b, type: 3}
+  m_Name: AudioBank
+  m_EditorClassIdentifier: 
+  entries:
+  - key: bgm/main
+    clips: []
+    autoLoadFolder: Audio/BGM
+    volume: 0.6
+    pitchMin: 1
+    pitchMax: 1
+    spatial: 0
+    minDistance: 1
+    maxDistance: 40
+  - key: footstep/grass
+    clips: []
+    autoLoadFolder: Audio/SFX/Footsteps/Grass
+    volume: 1
+    pitchMin: 0.92
+    pitchMax: 1.08
+    spatial: 1
+    minDistance: 0.5
+    maxDistance: 25
+  - key: footstep/stone
+    clips: []
+    autoLoadFolder: Audio/SFX/Footsteps/Stone
+    volume: 1
+    pitchMin: 0.92
+    pitchMax: 1.08
+    spatial: 1
+    minDistance: 0.5
+    maxDistance: 25
+  - key: footstep/sand
+    clips: []
+    autoLoadFolder: Audio/SFX/Footsteps/Sand
+    volume: 0.9
+    pitchMin: 0.92
+    pitchMax: 1.08
+    spatial: 1
+    minDistance: 0.5
+    maxDistance: 25
+  - key: footstep/water
+    clips: []
+    autoLoadFolder: Audio/SFX/Footsteps/Water
+    volume: 1.1
+    pitchMin: 0.9
+    pitchMax: 1.1
+    spatial: 1
+    minDistance: 1
+    maxDistance: 30
+  - key: splash/in
+    clips: []
+    autoLoadFolder: Audio/SFX/Splash/In
+    volume: 1.2
+    pitchMin: 0.95
+    pitchMax: 1.05
+    spatial: 1
+    minDistance: 2
+    maxDistance: 40
+  - key: splash/out
+    clips: []
+    autoLoadFolder: Audio/SFX/Splash/Out
+    volume: 1.1
+    pitchMin: 0.95
+    pitchMax: 1.05
+    spatial: 1
+    minDistance: 2
+    maxDistance: 40
+  - key: land
+    clips: []
+    autoLoadFolder: Audio/SFX/Land
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+    spatial: 1
+    minDistance: 1
+    maxDistance: 30
+  - key: ambient/waterfall
+    clips: []
+    autoLoadFolder: Audio/SFX/Ambient/Waterfall
+    volume: 0.9
+    pitchMin: 1
+    pitchMax: 1
+    spatial: 1
+    minDistance: 5
+    maxDistance: 60
+  - key: ambient/river
+    clips: []
+    autoLoadFolder: Audio/SFX/Ambient/River
+    volume: 0.8
+    pitchMin: 1
+    pitchMax: 1
+    spatial: 1
+    minDistance: 3
+    maxDistance: 40
+  - key: combat/hit
+    clips: []
+    autoLoadFolder: Audio/SFX/Combat
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+    spatial: 1
+    minDistance: 2
+    maxDistance: 40

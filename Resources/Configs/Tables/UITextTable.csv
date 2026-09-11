@@ -1,0 +1,32 @@
+﻿key,zh,en
+ui.common.close,关闭,Close
+ui.common.cancel,取消,Cancel
+ui.common.confirm,确定,OK
+ui.common.refresh,刷新,Refresh
+bag.title,背包,Inventory
+bag.subtitle,我的种子,My Seeds
+bag.empty,背包里还没有种子,No seeds yet
+bag.hint,点击卡片开始种植 · B 键开关背包,Click a card to plant · B to toggle
+bag.terrainPrefix,可种植：,Plantable: 
+bag.sunPrefix,阳光 ,Sun 
+bag.cooling,冷却中,Cooling down
+bag.planting,种植中：,Planting: 
+lobby.title,局域网联机,LAN Multiplayer
+lobby.playerName,玩家名称,Player name
+lobby.namePlaceholder,输入你的昵称,Enter your name
+lobby.host,创建主机,Host
+lobby.map,地图,Map
+lobby.mapCurrent,当前地图,Current map
+lobby.join,加入游戏,Join
+lobby.serverList,局域网内的服务器,Servers on LAN
+lobby.noServer,未发现服务器（可手动输入主机地址）,No servers found (enter host address manually)
+lobby.address,主机地址,Host address
+lobby.connect,连接,Connect
+lobby.connecting,连接中…,Connecting...
+lobby.connected,已连接,Connected
+lobby.disconnected,未连接,Not connected
+lobby.hostMode,你是主机,You are the host
+lobby.players,玩家,Players
+lobby.statusPrefix,状态：,Status: 
+lobby.hint,房主选地图后创建主机；其他人点列表里的服务器或直接输入 IP,Host picks a map then creates; others click a server or type an IP
+lobby.disconnect,断开,Disconnect

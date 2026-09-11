@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1d0647a55cbe384db3faf7b88d00f54, type: 3}
+  m_Name: UITextTable
+  m_EditorClassIdentifier: 
+  resourcePath: Configs/Tables/UITextTable
+  entries:
+  - key: ui.common.close
+    zh: "\u5173\u95ED"
+    en: Close
+  - key: ui.common.cancel
+    zh: "\u53D6\u6D88"
+    en: Cancel
+  - key: ui.common.confirm
+    zh: "\u786E\u5B9A"
+    en: OK
+  - key: ui.common.refresh
+    zh: "\u5237\u65B0"
+    en: Refresh
+  - key: bag.title
+    zh: "\u80CC\u5305"
+    en: Inventory
+  - key: bag.subtitle
+    zh: "\u6211\u7684\u79CD\u5B50"
+    en: My Seeds
+  - key: bag.empty
+    zh: "\u80CC\u5305\u91CC\u8FD8\u6CA1\u6709\u79CD\u5B50"
+    en: No seeds yet
+  - key: bag.hint
+    zh: "\u70B9\u51FB\u5361\u7247\u5F00\u59CB\u79CD\u690D \xB7 B \u952E\u5F00\u5173\u80CC\u5305"
+    en: "Click a card to plant \xB7 B to toggle"
+  - key: bag.terrainPrefix
+    zh: "\u53EF\u79CD\u690D\uFF1A"
+    en: 'Plantable:'
+  - key: bag.sunPrefix
+    zh: "\u9633\u5149"
+    en: Sun
+  - key: bag.cooling
+    zh: "\u51B7\u5374\u4E2D"
+    en: Cooling down
+  - key: bag.planting
+    zh: "\u79CD\u690D\u4E2D\uFF1A"
+    en: 'Planting:'
+  - key: lobby.title
+    zh: "\u5C40\u57DF\u7F51\u8054\u673A"
+    en: LAN Multiplayer
+  - key: lobby.playerName
+    zh: "\u73A9\u5BB6\u540D\u79F0"
+    en: Player name
+  - key: lobby.namePlaceholder
+    zh: "\u8F93\u5165\u4F60\u7684\u6635\u79F0"
+    en: Enter your name
+  - key: lobby.host
+    zh: "\u521B\u5EFA\u4E3B\u673A"
+    en: Host
+  - key: lobby.map
+    zh: "\u5730\u56FE"
+    en: Map
+  - key: lobby.mapCurrent
+    zh: "\u5F53\u524D\u5730\u56FE"
+    en: Current map
+  - key: lobby.join
+    zh: "\u52A0\u5165\u6E38\u620F"
+    en: Join
+  - key: lobby.serverList
+    zh: "\u5C40\u57DF\u7F51\u5185\u7684\u670D\u52A1\u5668"
+    en: Servers on LAN
+  - key: lobby.noServer
+    zh: "\u672A\u53D1\u73B0\u670D\u52A1\u5668\uFF08\u53EF\u624B\u52A8\u8F93\u5165\u4E3B\u673A\u5730\u5740\uFF09"
+    en: No servers found (enter host address manually)
+  - key: lobby.address
+    zh: "\u4E3B\u673A\u5730\u5740"
+    en: Host address
+  - key: lobby.connect
+    zh: "\u8FDE\u63A5"
+    en: Connect
+  - key: lobby.connecting
+    zh: "\u8FDE\u63A5\u4E2D\u2026"
+    en: Connecting...
+  - key: lobby.connected
+    zh: "\u5DF2\u8FDE\u63A5"
+    en: Connected
+  - key: lobby.disconnected
+    zh: "\u672A\u8FDE\u63A5"
+    en: Not connected
+  - key: lobby.hostMode
+    zh: "\u4F60\u662F\u4E3B\u673A"
+    en: You are the host
+  - key: lobby.players
+    zh: "\u73A9\u5BB6"
+    en: Players
+  - key: lobby.statusPrefix
+    zh: "\u72B6\u6001\uFF1A"
+    en: 'Status:'
+  - key: lobby.hint
+    zh: "\u623F\u4E3B\u9009\u5730\u56FE\u540E\u521B\u5EFA\u4E3B\u673A\uFF1B\u5176\u4ED6\u4EBA\u70B9\u5217\u8868\u91CC\u7684\u670D\u52A1\u5668\u6216\u76F4\u63A5\u8F93\u5165
+      IP"
+    en: Host picks a map then creates; others click a server or type an IP
+  - key: lobby.disconnect
+    zh: "\u65AD\u5F00"
+    en: Disconnect

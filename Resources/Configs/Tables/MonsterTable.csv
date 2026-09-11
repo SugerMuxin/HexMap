@@ -1,0 +1,2 @@
+﻿id,configPath,name,desc,prefab,maxHealth,moveSpeed,turnSpeed,yOffset,lockMode,detectRange,retargetInterval,switchOnlyWhenCloser,repathInterval,arriveDistance,attackRange,attackPlayers,attackDamage,attackInterval,stripColliders,corpseLifetime,unlock,order
+Zombie,Assets/Resources/Configs/Monsters/MonsterConfig_Zombie.asset,僵尸,从怪物巢穴诞生的怪物：锁定离它最近的玩家并沿六边形路径追击，被更近的玩家攻击时转换锁定目标。,Assets/Resources/Prefabs/Monsters/Zombie1.prefab,100,4,720,0,FirstUntilAttacked,0,0.5,1,0.5,1,6,0,10,1.5,0,1.5,1,0

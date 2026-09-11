@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64daa14791a33924aa5d592f66275660, type: 3}
+  m_Name: SceneConfigTable
+  m_EditorClassIdentifier: 
+  resourcePath: Configs/Tables/SceneConfigTable
+  entries:
+  - id: SampleScene_Zombie
+    scene: SampleScene
+    monsterId: Zombie
+    monster: {fileID: 11400000, guid: 3cad9ca27330fdf449ba8333a42b0335, type: 2}
+    count: 8
+    interval: 3
+    maxAlive: 4
+    startDelay: 2
+    waves: 1
+    waveInterval: 15
+    waitForClear: 1
+    spawnPoint: 0
+    offsetCoordinates: {x: 0, y: 0}
+    enabled: 1
+    order: 0
